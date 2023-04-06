@@ -24,6 +24,9 @@ import { GetServerSideProps } from 'next';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const ItemDisplay: NextPage = (data3: any) => {
+  console.log(data3);
+  console.log('きた');
+  console.log(`${process.env.NEXT_PUBLIC_BACKEND_URL}/item`);
   const router = useRouter();
   // async function data2(){
   //     let a =await supabase.from("items").select("*")
@@ -53,27 +56,29 @@ const ItemDisplay: NextPage = (data3: any) => {
     if (category) {
       setResource(
         // `${process.env.NEXT_PUBLIC_PROTEIN}/api/items?flavor_like=${flavor}&category=${category}`
-        `${process.env.DATABASE_URL}/search`
+        `${process.env.BACKEND_URL}/search`
       );
     } else if (flavor) {
       setResource(
         // `${process.env.NEXT_PUBLIC_PROTEIN}/api/items?flavor_like=${flavor}`
-        `${process.env.DATABASE_URL}/search/flavor`
+        `${process.env.BACKEND_URL}/search/flavor`
       );
     } else {
       setResource(
         // `${process.env.NEXT_PUBLIC_PROTEIN}/api/items`
-        `${process.env.DATABASSE_URL}/item`
+        `${process.env.BACKEND_URL}/item`
       );
     }
   }, [flavor, category]);
 
   const { data, error } = useSWR(
-    `${process.env.DATABASE_URL}/item`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/item`,
     fetcher
   );
   if (error) return <div>Failed to Load</div>;
   if (!data) return <div>Loading...</div>;
+
+  console.log(data);
 
   //ポストする
   // useEffect( () => {
@@ -114,7 +119,8 @@ const ItemDisplay: NextPage = (data3: any) => {
     });
   };
 
-  const searchData = data3.data3.filter((item: Item) => {
+  // const searchData = data3.data3.filter((item: Item) => {
+  const searchData = data.filter((item: Item) => {
     return (
       searchQuery.length === 0 || item.name.match(searchQuery)
       // 検索BOXに値がない場合のmap、searchQueryに入っている値とdb.jsonのnameと合致する商品のみ表示するmap

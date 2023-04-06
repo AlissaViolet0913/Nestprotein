@@ -20,37 +20,50 @@ export const getServerSideProps: GetServerSideProps = async ({
   const cookies = req.cookies;
   const cookie = Number(cookies.id);
   // console.log(cookie)
-  // let user = { id: cookies.id };
-  // try {
-    const users = await supabase.from("users").select("*").eq("id", cookie);
-    const user = users.data![0];
-    console.log(user);
+  let user = { id: cookies.id };
+  try {
+    const res = await fetch(`${process.env.DATABASE_URL}/user/`);
+    user = await res.json();
+  } catch (err) {
+    console.error('failed to get user', err);
+    errors.push(
+      'ユーザー情報の取得に失敗しました。リロードしてください。'
+    );
+  }
+  // const users = await supabase.from("users").select("*").eq("id", cookie);
+  // const user = users.data![0];
+  // console.log(user);
 
-    // const res = await fetch(
-    //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/users/${cookies.id}`
-    // );
-    // user = await res.json();
+  //   const res = await fetch(
+  //     `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/users/${cookies.id}`
+  //   );
+  //   user = await res.json();
   // } catch (err) {
   //   console.error('failed to get user', err);
   //   errors.push('ユーザー情報の取得に失敗しました。リロードしてください。');
   // }
 
   //supabaseにて購入履歴(purchaseHistories)の情報を取得
-  const itemsArray2 = await supabase.from('purchaseHistories').select("*").eq("userId",cookie);
+  const itemsArray2 = await supabase
+    .from('purchaseHistories')
+    .select('*')
+    .eq('userId', cookie);
   const itemsArray3 = itemsArray2.data!;
   const itemsArray4: Item[] = [];
   try {
-  itemsArray3.forEach((element) => {
-    const items = element.items;
+    itemsArray3.forEach((element) => {
+      const items = element.items;
 
-    items.forEach((item: Item) => {
-      itemsArray4.push(item);
+      items.forEach((item: Item) => {
+        itemsArray4.push(item);
+      });
     });
-  });
-} catch (err) {
-  // console.error('failed to get purchaseHistories', err);
-  errors.push('履歴情報の取得に失敗しました。リロードしてください。');
-}
+  } catch (err) {
+    // console.error('failed to get purchaseHistories', err);
+    errors.push(
+      '履歴情報の取得に失敗しました。リロードしてください。'
+    );
+  }
 
   // 購入履歴のfetchで取得している部分（一応、残しています）
   // const itemsArray: Item[] = [];
@@ -73,9 +86,12 @@ export const getServerSideProps: GetServerSideProps = async ({
 
   //サブスク
   const subscriptionArray: Item[] = [];
-  const subscriptionArray2 = await supabase.from('subscription').select("*").eq("userId",cookie);
+  const subscriptionArray2 = await supabase
+    .from('subscription')
+    .select('*')
+    .eq('userId', cookie);
   const subscriptionArray3 = subscriptionArray2.data!;
- 
+
   try {
     // const regular = await fetch(
     //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/subscription?userId=${cookies.id}`
@@ -88,13 +104,19 @@ export const getServerSideProps: GetServerSideProps = async ({
     });
   } catch (err) {
     // console.error('failed to get subscription', err);
-    errors.push('サブスク情報の取得に失敗しました。リロードしてください。');
+    errors.push(
+      'サブスク情報の取得に失敗しました。リロードしてください。'
+    );
   }
 
   //サブスクの履歴
   const subscriptionHistoriesArray: Item[] = [];
-  const subscriptionHistoriesArray2 = await supabase.from('subscriptionHistories').select("*").eq("userId",cookie);
-  const subscriptionHistoriesArray3 = subscriptionHistoriesArray2.data!;
+  const subscriptionHistoriesArray2 = await supabase
+    .from('subscriptionHistories')
+    .select('*')
+    .eq('userId', cookie);
+  const subscriptionHistoriesArray3 =
+    subscriptionHistoriesArray2.data!;
 
   try {
     // const past = await fetch(
@@ -107,7 +129,9 @@ export const getServerSideProps: GetServerSideProps = async ({
     });
   } catch (err) {
     // console.error('failed to get subscriptionHistories', err);
-    errors.push('サブスク履歴情報の取得に失敗しました。リロードしてください。');
+    errors.push(
+      'サブスク履歴情報の取得に失敗しました。リロードしてください。'
+    );
   }
 
   return {
@@ -133,7 +157,7 @@ const UserDetails = ({
 }: any) => {
   //サブスクからサブスク購入履歴への処理
   const router = useRouter();
-  const handler =  async (items: Item) => {
+  const handler = async (items: Item) => {
     subscriptionArray.forEach((cart: Item) => {
       cart.date = new Date().toLocaleString('ja-JP');
     });
@@ -151,14 +175,17 @@ const UserDetails = ({
     //     body: JSON.stringify(purchaseHistories),
     //   }
     // )
-    await supabase.from('subscriptionHistories').insert({userId,items}).then(() => {
-      deleteCarts(items);
-      router.reload();
-    });
+    await supabase
+      .from('subscriptionHistories')
+      .insert({ userId, items })
+      .then(() => {
+        deleteCarts(items);
+        router.reload();
+      });
   };
 
   const deleteCarts = async (items: Item) => {
-    await supabase.from('subscription').delete().eq("id",items.id);
+    await supabase.from('subscription').delete().eq('id', items.id);
     // fetch(
     //   `${process.env.NEXT_PUBLIC_PROTEIN}/api/subscription/${items.id}`,
     //   {

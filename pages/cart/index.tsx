@@ -7,23 +7,29 @@ import { useRouter } from 'next/router';
 import Header from '../layout/header';
 import Footer from '../layout/footer';
 import { User, Item, Item2 } from '../../types/type';
-import { supabase } from "../../utils/supabase"; // supabaseをコンポーネントで使うときはかく
+import { supabase } from '../../utils/supabase'; // supabaseをコンポーネントで使うときはかく
 
-
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+}) => {
   const cookies = req.cookies;
-  let { data }: { data: any } = await supabase.from("carts").select("*").eq("userId", cookies.id);
+  let { data }: { data: any } = await supabase
+    .from('carts')
+    .select('*')
+    .eq('userId', cookies.id);
   // const res = await fetch(
   //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/carts?userId=${cookies.id}`
   // );
   // const carts = await res.json();
   return {
-    props: { carts: data, cookies }
+    props: { carts: data, cookies },
   };
 };
 
-
-const Cart: NextPage<{ carts: Item2, cookies: Item }> = ({ carts, cookies }) => {
+const Cart: NextPage<{ carts: Item2; cookies: Item }> = ({
+  carts,
+  cookies,
+}) => {
   const [localData, setLocalData] = useState([]);
   const router = useRouter();
 
@@ -48,7 +54,7 @@ const Cart: NextPage<{ carts: Item2, cookies: Item }> = ({ carts, cookies }) => 
 
   // cartsの削除【始まり】
   async function deleteItem(cart: Item) {
-    await supabase.from("carts").delete().eq("id", cart.id)
+    await supabase.from('carts').delete().eq('id', cart.id);
     // fetch(`${process.env.NEXT_PUBLIC_PROTEIN}/api/carts/${cart.id}`, {
     //   method: 'DELETE',
     // });
@@ -95,7 +101,6 @@ const Cart: NextPage<{ carts: Item2, cookies: Item }> = ({ carts, cookies }) => 
     initialValueLocal
   );
   // localDataの合計【終わり】
-
 
   const routerHandler = () => {
     if (carts.length > 0) {
@@ -204,7 +209,9 @@ const Cart: NextPage<{ carts: Item2, cookies: Item }> = ({ carts, cookies }) => 
                   />
                   <div className={styles.text_content}>
                     <Link
-                      href={`../items/${encodeURIComponent(data.value.itemId)}`}
+                      href={`../items/${encodeURIComponent(
+                        data.value.itemId
+                      )}`}
                       className={styles.a}
                     >
                       <p>{data.value.name}</p>

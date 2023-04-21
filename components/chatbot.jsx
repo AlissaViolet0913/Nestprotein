@@ -128,14 +128,20 @@ export default function ChatBotComponent(props) {
   useEffect(() => {
     async function fetchData() {
       if (userId !== 0) {
-        let { data } = await supabase
-          .from('users')
-          .select()
-          .eq('id', userId);
+        // let { data } = await supabase
+        //   .from('users')
+        //   .select()
+        //   .eq('id', userId);
+        const data = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`
+        );
+        const user = await data.json();
+        console.log(user);
         // const res = await fetch(`${process.env.NEXT_PUBLIC_PROTEIN_DATA}/users/${userId}`);
         // const user = await res.json();
         // const user = data[0];
-        setUserDB(data[0]);
+        setUserDB(user);
+        // setUserDB(data[0]);
       }
     }
     fetchData();

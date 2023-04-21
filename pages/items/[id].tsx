@@ -14,7 +14,11 @@ import Footer from '../layout/footer';
 import { supabase } from '../../utils/supabase'; // supabaseをコンポーネントで使うときはかく
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data }: any = await supabase.from('items').select('*');
+  // const { data }: any = await supabase.from('items').select('*');
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/item`
+  );
+  const data = await res.json();
   // const res = await fetch(
   //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/items/`
   // );
@@ -35,15 +39,19 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({
   params,
 }: GetStaticPropsContext) => {
-  let { data }: any = await supabase
-    .from('items')
-    .select()
-    .eq('id', params!.id);
+  // let { data }: any = await supabase
+  //   .from('items')
+  //   .select()
+  //   .eq('id', params!.id);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/item/${params!.id}`
+  );
+  const detail = await res.json();
   // const res = await fetch(
   //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/items/${params!.id}`
   // );
   // const detail = await res.json();
-  const detail = data[0];
+  // const detail = data[0];
   console.log(detail);
   return {
     props: { detail },
@@ -80,7 +88,6 @@ const ItemDetail: NextPage<{ detail: Item }> = ({ detail }) => {
   const [userId, setUserId] = React.useState('');
 
   const [flavor, setFlavor] = React.useState(arrFlavor[0]);
-
 
   //　数量変更
   const addHandlerNext = (sub: number) => {
@@ -218,7 +225,6 @@ const ItemDetail: NextPage<{ detail: Item }> = ({ detail }) => {
         JSON.stringify(cartsForStrage)
       );
       router.push('/cart');
-
     } else if (document.cookie.includes(`; id=`)) {
       await supabase.from('carts').insert({
         userId,
@@ -231,7 +237,6 @@ const ItemDetail: NextPage<{ detail: Item }> = ({ detail }) => {
       });
       router.push('/cart');
     } else if (document.cookie.includes('; __stripe_mid=')) {
-
       await supabase.from('carts').insert({
         userId,
         itemId,

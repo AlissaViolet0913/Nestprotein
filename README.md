@@ -1,9 +1,7 @@
 # プロジェクトの概要
 
-
 プロテインの EC サイト。
 商品の在庫に制限なし。
-
 
 # 使用方法、インストール方法、実行方法
 
@@ -24,6 +22,8 @@ yarn
   "@splidejs/react-splide": "^0.7.12",
   "@supabase/supabase-js": "^2.2.0",
   "@types/formidable": "^2.0.5",
+  js-cookie
+  "@types/js-cookie"
 
 - サーバー起動
 
@@ -44,7 +44,6 @@ yarn mock-api
 メールアドレス:test@test.com
 パスワード:rakutein
 ```
-
 
 # ダミー決済の入力情報について
 

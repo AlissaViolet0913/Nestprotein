@@ -78,9 +78,15 @@ const ItemDetail: NextPage<{ detail: Item }> = ({ detail }) => {
   // const [userId, setUserId] = React.useState('');
   // const [flavor, setFlavor] = React.useState(detail.flavor[0]);
 
-  const flavor2: any = detail.flavor;
-  let strChangeFlavor = flavor2.replace(/{|"|\\|}|/g, '');
-  const arrFlavor = strChangeFlavor.split(',');
+  const arrFlavor: any = detail.flavor;
+  // const flavor2: any = detail.flavor;s
+  // console.log(flavor2.join());
+  // // join()メソッドで配列要素を「,」区切りの文字列に変換
+  // // replace()メソッドで「,」以外の文字を削除
+  // // フラグ機能:【/正規表現/g】で左から右に変換
+  // let strChangeFlavor = flavor2.join().replace(/"|{|}|\\/g, '');
+  // // let strChangeFlavor = flavor2.replace(/{|"|\\|}|/g, '');
+  // const arrFlavor = strChangeFlavor.split(',');
 
   const router = useRouter();
   const [count, setCount] = React.useState(1);
@@ -137,6 +143,11 @@ const ItemDetail: NextPage<{ detail: Item }> = ({ detail }) => {
     name: detail.name,
     flavor: flavor,
     price: detail.price,
+    countity: count,
+  };
+
+  const cartData = {
+    itemId: detail.id,
     countity: count,
   };
   // カートへ追加【終わり】
@@ -226,14 +237,19 @@ const ItemDetail: NextPage<{ detail: Item }> = ({ detail }) => {
       );
       router.push('/cart');
     } else if (document.cookie.includes(`; id=`)) {
-      await supabase.from('carts').insert({
-        userId,
-        itemId,
-        imageUrl,
-        name,
-        flavor,
-        price,
-        countity,
+      // await supabase.from('carts').insert({
+      //   userId,
+      //   itemId,
+      //   imageUrl,
+      //   name,
+      //   flavor,
+      //   price,
+      //   countity,
+      // });
+      await fetch(`${process.env.NEXT_PUBIC_BACKEND_URL}/cart`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cartData),
       });
       router.push('/cart');
     } else if (document.cookie.includes('; __stripe_mid=')) {

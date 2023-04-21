@@ -4,31 +4,50 @@ import styles from '../../styles/purchase.module.css';
 import { GetServerSideProps } from 'next';
 import Header from '../layout/header';
 import Footer from '../layout/footer';
-import { Item,User } from '../../types/type';
-import { supabase } from "../../utils/supabase";
+import { Item, User } from '../../types/type';
+import { supabase } from '../../utils/supabase';
 import React from 'react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
 }) => {
   const cookies = req.cookies;
-  const cookie = cookies.id
-  //userの情報を取得
-  const user2 = await supabase.from("users").select().eq("id", cookies.id);
- let user = user2.data![0];
+  const cookie = cookies.id;
+  //userの情報を取得（supabase）
+  // const user2 = await supabase
+  //   .from('users')
+  //   .select()
+  //   .eq('id', cookies.id);
+  // let user = user2.data![0];
 
- //userの情報取得（fetchの部分）
+  // userの情報を取得
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`
+  );
+  const users = await res.json();
+  const user = users[0];
+
+  //userの情報取得
   // await fetch(
   //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/users?id=${cookies.id}`
   // );
   // const users = await res.json();
   // const user = users[0];
 
-  //cartsの情報を取得
-  const carts2 = await supabase.from("carts").select().eq("userId", cookies.id);
-  const carts = carts2.data;
+  //cartsの情報を取得(supabase)
+  // const carts2 = await supabase
+  //   .from('carts')
+  //   .select()
+  //   .eq('userId', cookies.id);
+  // const carts = carts2.data;
 
-  // cartsの情報を取得（fetchの部分）
+  //cartsの情報を取得
+  const resCarts = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/cart`
+  );
+  const carts = await resCarts.json();
+
+  // cartsの情報を取得
   // const resCarts = await fetch(
   //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/carts?userId=${cookies.id}`
   // );
@@ -38,7 +57,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     props: {
       user: user,
       carts: carts,
-      cookie:cookie,
+      cookie: cookie,
     },
   };
 };
@@ -50,8 +69,7 @@ export default function PurchaseDisplay({
 }: {
   user: User;
   carts: Item;
-  cookie:number;
-
+  cookie: number;
 }) {
   // const {user,carts} = props
 

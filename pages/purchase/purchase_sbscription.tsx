@@ -7,37 +7,46 @@ import { useRouter } from 'next/router';
 import Footer from '../layout/footer';
 import { Item } from '../../types/type';
 import React from 'react';
-import { supabase } from "../../utils/supabase";
+import { supabase } from '../../utils/supabase';
 
 export const getServerSideProps: GetServerSideProps = async (
   context
 ) => {
   const cookies = context.req.cookies;
 
-  const subscriptionCart = await supabase.from("subscriptionCart").select("*").eq("userId", cookies.id);
-  const subscriptionCart3 = subscriptionCart.data!;
+  // 定期購入のcart情報取得（supabase）
+  // const subscriptionCart = await supabase.from("subscriptionCart").select("*").eq("userId", cookies.id);
+  // const subscriptionCart3 = subscriptionCart.data!;
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/subscription/cart`
+  );
+  const subscriptionCart = await res.json();
+
+  // 定期購入のcart情報取得
   // const res = await fetch(
   //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/subscriptionCart?userId=${cookies.id}`
   // );
   // const subscriptionCart = await res.json();
 
-  const subscriptionCart2 = subscriptionCart3.slice(-1)[0];
-  //購入時間
-  subscriptionCart3.forEach((cart: Item) => {
-    cart.date = new Date().toLocaleString('ja-JP');
+  console.log(subscriptionCart);
+  // const subscriptionCart2 = subscriptionCart3.slice(-1)[0];
+  // //購入時間
+  // subscriptionCart3.forEach((cart: Item) => {
+  //   cart.date = new Date().toLocaleString('ja-JP');
+  // });
+
+  const userId = Number(cookies.id);
+  // const id = subscriptionCart2.id;
+  const id = subscriptionCart.id;
+  // const items = subscriptionCart2;
+  const items = subscriptionCart;
+
+  await supabase.from('subscription').insert({
+    userId,
+    id,
+    items,
   });
-
-    const userId = Number(cookies.id)
-    const id = subscriptionCart2.id
-    const items = subscriptionCart2
-
-
-
-    await supabase.from('subscription').insert({
-      userId,
-      id,
-      items
-    });
 
   // await fetch(
   //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/subscription`,
@@ -49,7 +58,8 @@ export const getServerSideProps: GetServerSideProps = async (
   // );
 
   return {
-    props: { subscriptionCart2 },
+    props: { subscriptionCart },
+    // props: { subscriptionCart2 },
   };
 };
 

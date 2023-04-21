@@ -148,11 +148,14 @@ function UsersNew() {
       // tel,
       // });
 
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        }
+      );
       router.push('/login');
       alert(
         'ご登録ありがとうございます！ログインをしてお買い物を続けてください'

@@ -20,10 +20,16 @@ export const getServerSideProps: GetServerSideProps = async ({
   const cookies = req.cookies;
   const cookie = Number(cookies.id);
   // console.log(cookie)
-  let user = { id: cookies.id };
+  // let user = { id: cookies.id };
+  let user = null;
+
   try {
-    const res = await fetch(`${process.env.DATABASE_URL}/user/`);
-    user = await res.json();
+    let url = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`
+    );
+    user = await url.json();
+    // const res = await fetch(`${process.env.DATABASE_URL}/user/`);
+    // user = await res.json();
   } catch (err) {
     console.error('failed to get user', err);
     errors.push(
@@ -44,25 +50,43 @@ export const getServerSideProps: GetServerSideProps = async ({
   // }
 
   //supabaseにて購入履歴(purchaseHistories)の情報を取得
-  const itemsArray2 = await supabase
-    .from('purchaseHistories')
-    .select('*')
-    .eq('userId', cookie);
-  const itemsArray3 = itemsArray2.data!;
-  const itemsArray4: Item[] = [];
+  // const itemsArray2 = await supabase
+  //   .from('purchaseHistories')
+  //   .select('*')
+  //   .eq('userId', cookie);
+  // const itemsArray3 = itemsArray2.data!;
+  // const itemsArray4: Item[] = [];
+  // try {
+  //   itemsArray3.forEach((element) => {
+  //     const items = element.items;
+
+  //     items.forEach((item: Item) => {
+  //       itemsArray4.push(item);
+  //     });
+  //   });
+  // } catch (err) {
+  //   // console.error('failed to get purchaseHistories', err);
+  //   errors.push(
+  //     '履歴情報の取得に失敗しました。リロードしてください。'
+  //   );
+  // }
+
+  const itemsArray: Item[] = [];
   try {
-    itemsArray3.forEach((element) => {
+    const resHistories = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/purchase`
+    );
+    const history: Item = await resHistories.json();
+    history.forEach((element) => {
       const items = element.items;
 
       items.forEach((item: Item) => {
-        itemsArray4.push(item);
+        itemsArray.push(item);
       });
     });
   } catch (err) {
-    // console.error('failed to get purchaseHistories', err);
-    errors.push(
-      '履歴情報の取得に失敗しました。リロードしてください。'
-    );
+    console.error('failed to get purchaseHistories', err);
+    errors.push('情報の取得に失敗しました。リロードしてください。');
   }
 
   // 購入履歴のfetchで取得している部分（一応、残しています）
@@ -86,22 +110,31 @@ export const getServerSideProps: GetServerSideProps = async ({
 
   //サブスク
   const subscriptionArray: Item[] = [];
-  const subscriptionArray2 = await supabase
-    .from('subscription')
-    .select('*')
-    .eq('userId', cookie);
-  const subscriptionArray3 = subscriptionArray2.data!;
+  // const subscriptionArray2 = await supabase
+  //   .from('subscription')
+  //   .select('*')
+  //   .eq('userId', cookie);
+  // const subscriptionArray3 = subscriptionArray2.data!;
 
   try {
+    const regular = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/subscription`
+    );
+    const items = await regular.json();
+    let subscription = items.map((itemId: number) => {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/item/${itemId}`);
+    });
+    subscriptionArray.push(await subscription.json());
+
     // const regular = await fetch(
     //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/subscription?userId=${cookies.id}`
     // );
     // const leave = await regular.json();
 
-    subscriptionArray3.forEach((element: Item) => {
-      const items = element.items;
-      subscriptionArray.push(items);
-    });
+    // subscriptionArray3.forEach((element: Item) => {
+    //   const items = element.items;
+    //   subscriptionArray.push(items);
+    // });
   } catch (err) {
     // console.error('failed to get subscription', err);
     errors.push(
@@ -110,23 +143,27 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
 
   //サブスクの履歴
-  const subscriptionHistoriesArray: Item[] = [];
-  const subscriptionHistoriesArray2 = await supabase
-    .from('subscriptionHistories')
-    .select('*')
-    .eq('userId', cookie);
-  const subscriptionHistoriesArray3 =
-    subscriptionHistoriesArray2.data!;
+  // const subscriptionHistoriesArray: Item[] = [];
+  // const subscriptionHistoriesArray2 = await supabase
+  //   .from('subscriptionHistories')
+  //   .select('*')
+  //   .eq('userId', cookie);
+  // const subscriptionHistoriesArray3 =
+  //   subscriptionHistoriesArray2.data!;
 
   try {
+    const past = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/subscription/history`
+    );
+    const remain = await past.json();
     // const past = await fetch(
     //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/subscriptionHistories?userId=${cookies.id}`
     // );
     // const remain = await past.json();
-    subscriptionHistoriesArray3.forEach((element: Item) => {
-      const items = element.items;
-      subscriptionHistoriesArray.push(items);
-    });
+    // subscriptionHistoriesArray3.forEach((element: Item) => {
+    //   const items = element.items;
+    //   subscriptionHistoriesArray.push(items);
+    // });
   } catch (err) {
     // console.error('failed to get subscriptionHistories', err);
     errors.push(
@@ -137,9 +174,10 @@ export const getServerSideProps: GetServerSideProps = async ({
   return {
     props: {
       user,
-      itemsArray4,
+      itemsArray,
+      // itemsArray4,
       subscriptionArray,
-      subscriptionHistoriesArray,
+      // subscriptionHistoriesArray,
       cookie,
       errors,
     },
@@ -248,6 +286,7 @@ const UserDetails = ({
             ご購入履歴
           </h2>
           {itemsArray4.map((item: any, index: any) => {
+            // {itemsArray4.map((item: any, index: any) => {
             return (
               <div key={index}>
                 <div>
@@ -313,6 +352,7 @@ const UserDetails = ({
             継続中の定期購入
           </h2>
           {subscriptionArray.map((items: Item, index: any) => {
+            // {subscriptionArray.map((items: Item, index: any) => {
             return (
               <div key={index}>
                 <div>

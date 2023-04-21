@@ -1,20 +1,22 @@
 import Head from 'next/head';
 import style from '../styles/index.module.css';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import router, { useRouter } from 'next/router';
 import Link from 'next/link';
 import HeaderLogin from './layout/headerLogin';
 import Image from 'next/image';
 import ItemDisplay from './items';
 import { GetServerSideProps } from 'next';
 import { Item, User, Users } from './../types/type';
-import { supabase } from "../utils/supabase";
-
+import { supabase } from '../utils/supabase';
+import { METHODS } from 'http';
+import Cookies from 'js-cookie';
 
 export default function UserLogin(cookieData: Item) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // ユーザーが見つかりませんの表示をfalseで見えなくして、クリックされて!200だったらtrueにして表示されるようにしているようにしている
   const [visible, setVisible] = useState(false);
   const [localData, setLocalData] = useState([]);
   const [userId, setUserId] = useState(0);
@@ -38,19 +40,29 @@ export default function UserLogin(cookieData: Item) {
 
   // ユーザーIDの取得&POST(onSubmitのタイミングで発火)
   const postUserdata = async () => {
-    let { data }: any = await supabase
-      .from("users")
-      .select()
-      .eq("email", email)
-      .eq("password", password);
+    //   let { data }: any = await supabase
+    //     .from('users')
+    //     .select()
+    //     .eq('email', email)
+    //     .eq('password', password);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`
+    );
+    const json = await res.json();
+    console.log(json);
     // const res = await fetch(
     //   `${process.env.NEXT_PUBLIC_PROTEIN_DATA}/users?email=${email}&password=${password}`
     // );
     // const json = await res.json();
-    const id = await data[0].id;
-    // console.log(id) id出てくる OK
+
+    // const id = await data[0].id;
+    // // console.log(id) id出てくる OK
+    // return id;
+    // //　idを返す
+    //ログインしてるときとしてないときのカートの結びつきのためにcookieのid
+    const id = await json.id;
+    console.log(id);
     return id;
-    //　idを返す
   };
 
   const data = {
@@ -60,52 +72,111 @@ export default function UserLogin(cookieData: Item) {
 
   const handler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(data)
-    fetch(`/api/login`, {
+    console.log(data);
+    console.log(JSON.stringify(data));
+    // fetch(`/api/login`, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json', },
+    //   body: JSON.stringify(data),
+    // })
+
+    //  fetch(`/api/login`, {
+    // fetch(`http://backend:3005/auth/login`, {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    })
-      .then((response) => {
-        response.json();
-        if (response.status !== 200) {
-          setVisible(true);
-        } else if (response.status === 200) {
-          if (filteredData) {
-            filteredData.forEach(async (data: any) => {
-              data.value.userId = await postUserdata();
+      //クロスオリジンリクエスト(CORS)の際にもcookie情報を送信できる
+      // オリジンとはスキーム（http）ホスト（localhost）ポート（3005）のこと
+      credentials: 'include',
+    }).then((response) => {
+      if (response.status !== 200) {
+        setVisible(true);
+        throw new Error('Login failed');
+      } else {
+        return response.json();
+      }
+    });
+    // .then((jsonResponse) => {
+    //   // backendのreturnに入っているidの値をfrontendのcookieにセットする
+    //   Cookies.set('id', jsonResponse);
+    //   if (filteredData) {
+    //     filteredData.forEach(async (data: any) => {
+    //       console.log(data);
+    //       data.value.userId = await postUserdata();
 
-              let userId = data.value.userId;
-              let itemId = data.value.itemId;
-              let imageUrl = data.value.imageUrl;
-              let name = data.value.name;
-              let flavor = data.value.flavor;
-              let price = data.value.price;
-              let countity = data.value.countity;
+    //       let userId = data.value.userId;
+    //       let itemId = data.value.itemId;
+    //       // let imageUrl = data.value.imageUrl;
+    //       // let name = data.value.name;
+    //       // let flavor = data.value.flavor;
+    //       // let price = data.value.price;
+    //       let countity = data.value.countity;
+    //       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart`, {
+    //         method: 'PATCH',
+    //         headers: {
+    //           'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ userId, itemId, countity }),
+    //       });
+    //       localStorage.clear();
+    //     });
+    //     router.push('/items');
+    //   }
+    // })
+    // .catch((error) => {
+    //   console.error(error);
+    // });
 
-              await supabase.from('carts').insert({
-                userId,
-                itemId,
-                imageUrl,
-                name,
-                flavor,
-                price,
-                countity,
-                // fetch(`${process.env.NEXT_PUBLIC_PROTEIN_DATA}/carts`, {
-                //   method: 'POST',
-                //   headers: {
-                //     'Content-Type': 'application/json',
-                //   },
-                //   body: JSON.stringify(data.value),
-                // });
-              });
-              localStorage.clear();
-            })
-            router.push('/items');
-          }
-        }
-      })
-  }
+    // }).then((response) => {
+    //   response.json();
+    //   if (response.status !== 200) {
+    //     setVisible(true);
+    //   } else if (response.status === 200) {
+    //     if (filteredData) {
+    //       filteredData.forEach(async (data: any) => {
+    //         console.log(data.value.userId);
+    //         data.value.userId = await postUserdata();
+
+    //         let userId = data.value.userId;
+    //         let itemId = data.value.itemId;
+    //         let imageUrl = data.value.imageUrl;
+    //         let name = data.value.name;
+    //         let flavor = data.value.flavor;
+    //         let price = data.value.price;
+    //         let countity = data.value.countity;
+
+    //         // await supabase.from('carts').insert({
+    //         //   userId,
+    //         //   itemId,
+    //         //   imageUrl,
+    //         //   name,
+    //         //   flavor,
+    //         //   price,
+    //         //   countity,
+    //         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart`, {
+    //           method: 'POST',
+    //           headers: {
+    //             'Content-Type': 'application/json',
+    //           },
+    //           body: JSON.stringify(userId, itemId, countity),
+    //         });
+    //         // fetch(`${process.env.NEXT_PUBLIC_PROTEIN_DATA}/carts`, {
+    //         //   method: 'POST',
+    //         //   headers: {
+    //         //     'Content-Type': 'application/json',
+    //         //   },
+    //         //   body: JSON.stringify(data.value),
+    //         // });
+
+    //         // });
+    //         localStorage.clear();
+    //       });
+    //       router.push('/items');
+    //     }
+    //   }
+    // });
+  };
 
   return (
     <div>

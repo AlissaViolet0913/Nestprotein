@@ -21,17 +21,62 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+// const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-const ItemDisplay: NextPage = (data3: any) => {
-  console.log(data3);
-  console.log('きた');
-  console.log(`${process.env.NEXT_PUBLIC_BACKEND_URL}/item`);
-  const router = useRouter();
+export const getServerSideProps: GetServerSideProps = async (
+  context
+) => {
+  const category = context.query.category;
+  const flavor = context.query.flavor;
+  const errors: string[] = [];
+  let data = null;
+  // try {
+  let url = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/item`
+  );
+  data = await url.json();
+  // } catch (err) {
+  //   console.log('failed to get items', err);
+  //   errors.push(
+  //     '商品一覧情報の取得に失敗しました。リロードしてください。'
+  //   );
+  // }
+
+  // クエリパラメータに応じて異なるデータを取得する
+
+  if (category) {
+    const url = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/category?category=${category}`
+    );
+    data = await url.json();
+  }
+  // if (category && flavor) {
+  //   const url = await fetch(
+  //     `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?category=${category}&flavor=${flavor}`
+  //   );
+  //   data = await url.json();
+  // }
+  if (flavor) {
+    const url = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/flavor?flavor=${flavor}`
+    );
+    data = await url.json();
+  }
+  return {
+    props: {
+      data,
+    },
+  };
+};
+
+const ItemDisplay: NextPage = ({ data }: any) => {
+  // const ItemDisplay: NextPage = (data3: any) => {
+  // const router = useRouter();
   // async function data2(){
   //     let a =await supabase.from("items").select("*")
   //     console.log(a.data!)
   // }
+  console.log(data);
 
   const [resource, setResource] = useState('');
   const [count, setCount] = useState(1);
@@ -51,34 +96,34 @@ const ItemDisplay: NextPage = (data3: any) => {
 
   const inputref = useRef<HTMLInputElement>();
 
-  //ポストする
-  useEffect(() => {
-    if (category) {
-      setResource(
-        // `${process.env.NEXT_PUBLIC_PROTEIN}/api/items?flavor_like=${flavor}&category=${category}`
-        `${process.env.BACKEND_URL}/search`
-      );
-    } else if (flavor) {
-      setResource(
-        // `${process.env.NEXT_PUBLIC_PROTEIN}/api/items?flavor_like=${flavor}`
-        `${process.env.BACKEND_URL}/search/flavor`
-      );
-    } else {
-      setResource(
-        // `${process.env.NEXT_PUBLIC_PROTEIN}/api/items`
-        `${process.env.BACKEND_URL}/item`
-      );
-    }
-  }, [flavor, category]);
+  // //ポストする
+  // useEffect(() => {
+  //   if (category) {
+  //     setResource(
+  //       `${process.env.NEXT_PUBLIC_PROTEIN}/items?flavor_like=${flavor}&category=${category}`
+  //       // `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?flavor=${flavor}&category=${category}`
+  //     );
+  //   } else if (flavor) {
+  //     setResource(
+  //       // `${process.env.NEXT_PUBLIC_PROTEIN}/items?flavor_like=${flavor}`
+  //       `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/flavor?flavor=${flavor}`
+  //     );
+  //   } else {
+  //     setResource(
+  //       // `${process.env.NEXT_PUBLIC_PROTEIN}/items`
+  //       `${process.env.NEXT_PUBLIC_BACKEND_URL}/item`
+  //     );
+  //   }
+  // }, [flavor, category]);
 
-  const { data, error } = useSWR(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/item`,
-    fetcher
-  );
-  if (error) return <div>Failed to Load</div>;
-  if (!data) return <div>Loading...</div>;
+  // const { data, error } = useSWR(
+  //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/item`,
+  //   fetcher
+  // );
+  // if (error) return <div>Failed to Load</div>;
+  // if (!data) return <div>Loading...</div>;
 
-  console.log(data);
+  // console.log(data);
 
   //ポストする
   // useEffect( () => {
@@ -101,12 +146,14 @@ const ItemDisplay: NextPage = (data3: any) => {
   // if (error) return <div>Failed to Load</div>;
   // if (!data) return <div>Loading...</div>;
 
+  const router = useRouter();
   // 種類検索イベント
   const categoryHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     setCategory(e.target.value);
     router.push({
       pathname: '/items',
-      query: { category: e.target.value, flavor: flavor },
+      query: { category: e.target.value },
+      // query: { category: e.target.value, flavor: flavor },
     });
   };
 

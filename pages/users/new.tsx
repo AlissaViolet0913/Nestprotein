@@ -107,6 +107,23 @@ function UsersNew() {
     let building = formValues.building;
     let tel = formValues.tel;
 
+    const data = {
+      firstName: firstName,
+      lastName: lastName,
+      firstNameKana: firstNameKana,
+      lastNameKana: lastNameKana,
+      middleName: middleName,
+      email: email,
+      password: password,
+      passwordConfirmation: passwordConfirmation,
+      postCode: postCode,
+      prefecture: prefecture,
+      city: city,
+      aza: aza,
+      building: building,
+      tel: tel,
+    };
+
     const newErrors = validate(formValues);
     setFormErrors(newErrors);
     setIsSubmit(true);
@@ -114,27 +131,33 @@ function UsersNew() {
       return isSubmit;
     } else {
       // let submit = async () => {
-        await supabase.from('users').insert({
-          firstName,
-          lastName,
-          firstNameKana,
-          lastNameKana,
-          middleName,
-          email,
-          password,
-          passwordConfirmation,
-          postCode,
-          prefecture,
-          city,
-          aza,
-          building,
-          tel,
-        });
-        router.push('/login');
-        alert(
-          'ご登録ありがとうございます！ログインをしてお買い物を続けてください'
-        );
-      }
+      // await supabase.from('users').insert({
+      // firstName,
+      // lastName,
+      // firstNameKana,
+      // lastNameKana,
+      // middleName,
+      // email,
+      // password,
+      // passwordConfirmation,
+      // postCode,
+      // prefecture,
+      // city,
+      // aza,
+      // building,
+      // tel,
+      // });
+
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      router.push('/login');
+      alert(
+        'ご登録ありがとうございます！ログインをしてお買い物を続けてください'
+      );
+    }
     // }
   };
 

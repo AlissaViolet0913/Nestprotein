@@ -149,7 +149,8 @@ function UsersNew() {
       // });
 
       await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
+        `http://localhost:3000/api/auth/signup`,
+        // `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

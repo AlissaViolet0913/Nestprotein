@@ -75,6 +75,12 @@ const nextConfig = {
         source: '/',
         destination: '/items/',
       },
+      {
+        // source: '/api/login',
+        source: '/api/login',
+        destination: 'http://backend:3005/auth/login',
+      },
+
       // {
       //   source: 'PROTEIN',
       //   destination: 'NEXT_PUBLIC_PROTEIN',

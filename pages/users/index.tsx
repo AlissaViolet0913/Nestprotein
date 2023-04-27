@@ -196,14 +196,18 @@ const UserDetails = ({
   //サブスクからサブスク購入履歴への処理
   const router = useRouter();
   const handler = async (items: Item) => {
-    subscriptionArray.forEach((cart: Item) => {
-      cart.date = new Date().toLocaleString('ja-JP');
-    });
+    // subscriptionArray.forEach((cart: Item) => {
+    //   cart.date = new Date().toLocaleString('ja-JP');
+    // });
 
     // const purchaseHistories = {
     //   userId: cookie,
     //   items: items,
     // };
+
+    const subscriptionHistories = {
+      items: items,
+    };
     const userId = cookie;
     // fetch(
     //   `${process.env.NEXT_PUBLIC_PROTEIN}/api/subscriptionHistories/`,
@@ -213,17 +217,31 @@ const UserDetails = ({
     //     body: JSON.stringify(purchaseHistories),
     //   }
     // )
-    await supabase
-      .from('subscriptionHistories')
-      .insert({ userId, items })
-      .then(() => {
-        deleteCarts(items);
-        router.reload();
-      });
+
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/subscription/history`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subscriptionHistories),
+      }
+    );
+
+    // await supabase
+    //   .from('subscriptionHistories')
+    //   .insert({ userId, items })
+    //   .then(() => {
+    //     deleteCarts(items);
+    //     router.reload();
+    //   });
   };
 
   const deleteCarts = async (items: Item) => {
-    await supabase.from('subscription').delete().eq('id', items.id);
+    // await supabase.from('subscription').delete().eq('id', items.id);
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/subscription`, {
+      method: 'DELETE',
+    });
+    router.reload();
     // fetch(
     //   `${process.env.NEXT_PUBLIC_PROTEIN}/api/subscription/${items.id}`,
     //   {

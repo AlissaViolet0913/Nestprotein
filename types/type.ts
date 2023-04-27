@@ -24,42 +24,25 @@ type User = {
   passwordConfirmation: string;
 };
 type Users = {
-  id:number,
-  firstName: string,
-  lastName: string,
-  firstNameKana: string,
-  lastNameKana: string,
-  middleName: string,
-  email: string,
-  password: string,
-  passwordConfirmation: string,
-  postCode: string,
-  prefecture: string,
-  city: string,
-  aza: string,
-  building: string,
-  tel: string,
-  deleted: boolean,
-}
+  id: number;
+  firstName: string;
+  lastName: string;
+  firstNameKana: string;
+  lastNameKana: string;
+  middleName: string;
+  email: string;
+  password: string;
+  passwordConfirmation: string;
+  postCode: string;
+  prefecture: string;
+  city: string;
+  aza: string;
+  building: string;
+  tel: string;
+  deleted: boolean;
+};
 
-type Users2={
-  firstName:string,
-    lastName: string,
-    firstNameKana: string,
-    lastNameKana: string,
-    postCode: string,
-    prefecture: string,
-    city: string,
-    aza: string,
-    building: string,
-    email: string,
-    middleName: string,
-    tel: string,
-    password: string,
-    passwordConfirmation: string,
-}
-
-type Users3 = React.Dispatch<React.SetStateAction<{
+type Users2 = {
   firstName: string;
   lastName: string;
   firstNameKana: string;
@@ -74,9 +57,26 @@ type Users3 = React.Dispatch<React.SetStateAction<{
   tel: string;
   password: string;
   passwordConfirmation: string;
-}>>;
+};
 
-
+type Users3 = React.Dispatch<
+  React.SetStateAction<{
+    firstName: string;
+    lastName: string;
+    firstNameKana: string;
+    lastNameKana: string;
+    postCode: string;
+    prefecture: string;
+    city: string;
+    aza: string;
+    building: string;
+    email: string;
+    middleName: string;
+    tel: string;
+    password: string;
+    passwordConfirmation: string;
+  }>
+>;
 
 type Item = {
   items: any;
@@ -103,7 +103,7 @@ type Item = {
 };
 
 type Item2 = {
-  map(arg0: (cart: Item) => JSX.Element): import("react").ReactNode;
+  map(arg0: (cart: Item) => JSX.Element): import('react').ReactNode;
   forEach(arg0: (element: Item) => void): unknown;
   length: number;
   userId: number;
@@ -136,7 +136,7 @@ type Favorite = {
   favoriteItem: any;
   id: number;
   userId: number;
-  itmId: number[];
+  itemId: number[];
   imageUrl: string;
   name: string;
   price: number;
@@ -146,6 +146,6 @@ export type { User };
 export type { Users };
 export type { Users2 };
 export type { Users3 };
-export type { Item,Item2 };
+export type { Item, Item2 };
 export type { Event };
 export type { Favorite };

@@ -11,6 +11,7 @@ import { Item, User, Users } from './../types/type';
 import { supabase } from '../utils/supabase';
 import { METHODS } from 'http';
 import Cookies from 'js-cookie';
+import axios from 'axios';
 
 export default function UserLogin(cookieData: Item) {
   const router = useRouter();
@@ -32,6 +33,20 @@ export default function UserLogin(cookieData: Item) {
     });
     setLocalData(collection as React.SetStateAction<never[]>);
   }, []);
+
+  fetch('http://backend:3005/auth/login', {
+    method: 'OPTIONS',
+    headers: {
+      'Access-Control-Request-Method': 'GET',
+      Origin: 'http://localhost:3000',
+    },
+  })
+    .then((response) => {
+      console.log(
+        response.headers.get('Access-Control-Allow-Methods')
+      );
+    })
+    .catch(console.error);
 
   //"ally-supports-cache"などを除外 (Local Storageの中の商品情報以外を削除)
   const filteredData = localData.filter((object: any) => {
@@ -74,29 +89,60 @@ export default function UserLogin(cookieData: Item) {
     event.preventDefault();
     console.log(data);
     console.log(JSON.stringify(data));
+    // JSONdataとの通信
     // fetch(`/api/login`, {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json', },
     //   body: JSON.stringify(data),
     // })
 
-    //  fetch(`/api/login`, {
-    // fetch(`http://backend:3005/auth/login`, {
+    // fetchによるバックエンド接続
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
+      mode: 'cors',
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        // JSON形式でデータを渡すのに必要な設定
+        'Content-Type': 'application/json',
+        // Origin: 'http://frontend:3000',
+        // // http://localhost:3000からのリクエストにのみアクセスを許可する
+        // 'Access-Control-Allow-Origin': 'http://frontend:3000',
+        // // trueにすることで、ブラウザは認証を含むリクエストを送信することができる、credentialsも必要になる
+        // 'Access-Control-Allow-Credentials': 'true',
+      },
       body: JSON.stringify(data),
       //クロスオリジンリクエスト(CORS)の際にもcookie情報を送信できる
       // オリジンとはスキーム（http）ホスト（localhost）ポート（3005）のこと
       credentials: 'include',
-    }).then((response) => {
-      if (response.status !== 200) {
-        setVisible(true);
-        throw new Error('Login failed');
-      } else {
-        return response.json();
-      }
-    });
+    })
+      .then((response) => {
+        if (response.status !== 200) {
+          setVisible(true);
+          throw new Error('Login failed');
+        } else {
+          return response.json();
+        }
+      })
+      .catch((error) => console.error(error));
+
+    // axiosによるバックエンド接続
+    // const url = axios
+    //   .post(
+    //     `${process.env.NEXT_PIBLIC_BACKENND_URL}/auth/login`,
+    //     data
+    //   )
+    //   .then((response) => {
+    //     console.log(url);
+    //     if (response.status !== 200) {
+    //       setVisible(true);
+    //       throw new Error('Login failed');
+    //     } else {
+    //       return response;
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.log('err:', err);
+    //   });
+
     // .then((jsonResponse) => {
     //   // backendのreturnに入っているidの値をfrontendのcookieにセットする
     //   Cookies.set('id', jsonResponse);
